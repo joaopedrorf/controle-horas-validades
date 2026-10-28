@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% import '_macros.html' as m with context %}
+{% block titulo %}{{ t.menu_painel }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <div>
+        <div class="sobretitulo">{{ data(hoje) }}</div>
+        <h1>{{ t.painel_admin }}</h1>
+    </div>
+    <a class="botao-principal" href="{{ url_for('lista_avisos') }}">{{ t.menu_avisos }}{% if pendentes %} · {{ pendentes }}{% endif %}</a>
+</div>
+
+{{ m.contadores(contagem) }}
+
+<h2 class="titulo-secao">{{ t.precisam_atencao }}</h2>
+{{ m.tabela_documentos(atencao, mostrar_dono=true, editar=false) }}
+{% endblock %}

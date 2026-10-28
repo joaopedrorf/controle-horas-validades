@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% import '_macros.html' as m with context %}
+{% block titulo %}{{ t.menu_avisos }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <div>
+        <h1>{{ t.menu_avisos }}</h1>
+        <p class="apagado">{{ t.avisos_explicacao }}</p>
+    </div>
+    {% if pendentes %}
+    <form method="POST" action="{{ url_for('enviar_avisos') }}">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button type="submit" class="botao-principal">{{ t.enviar_agora }} · {{ pendentes|length }}</button>
+    </form>
+    {% endif %}
+</div>
+
+{% if not smtp %}<div class="aviso aviso-info">{{ t.sem_smtp }}</div>{% endif %}
+
+<h2 class="titulo-secao">{{ t.a_enviar }}</h2>
+{% if pendentes %}
+<div class="rolagem">
+<table class="lista">
+    <thead><tr><th>{{ t.piloto }}</th><th>{{ t.documento }}</th><th>{{ t.vencimento }}</th><th>{{ t.lembrete }}</th></tr></thead>
+    <tbody>
+    {% for doc, marco in pendentes %}
+        <tr>
+            <td>{{ doc.dono.nome }} <span class="apagado mono">{{ doc.dono.email }}</span></td>
+            <td>{{ m.nome_doc(doc) }}</td>
+            <td class="mono">{{ data(doc.vencimento) }}</td>
+            <td>{{ t['marco_' ~ marco] }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}
+<p class="apagado">{{ t.nada_a_enviar }}</p>
+{% endif %}
+
+<h2 class="titulo-secao">{{ t.historico }}</h2>
+{% if historico %}
+<div class="rolagem">
+<table class="lista">
+    <thead><tr><th>{{ t.enviado_em }}</th><th>{{ t.piloto }}</th><th>{{ t.documento }}</th><th>{{ t.lembrete }}</th><th></th></tr></thead>
+    <tbody>
+    {% for a in historico %}
+        <tr>
+            <td class="mono">{{ data(a.enviado_em.date()) }} {{ a.enviado_em.strftime('%H:%M') }}</td>
+            <td>{{ a.documento.dono.nome }}</td>
+            <td>{{ m.nome_doc(a.documento) }}</td>
+            <td>{{ t['marco_' ~ a.marco] }}</td>
+            <td>{% if a.simulado %}<span class="selo selo-simulado">{{ t.simulado }}</span>{% endif %}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}
+<p class="apagado">{{ t.nenhum_aviso }}</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,29 @@
+# Uma vez por dia, pede ao site que mande os e-mails de vencimento.
+# (O plano grátis do Render não tem tarefa agendada, então o GitHub faz o papel de "despertador".)
+#
+# Para ligar: em Settings > Secrets and variables > Actions, crie
+#   SITE_URL     = endereço do site, ex: https://controle-horas-validades.onrender.com
+#   AVISOS_TOKEN = a mesma frase colocada na variável AVISOS_TOKEN do Render
+name: Avisos de vencimento
+
+on:
+  schedule:
+    - cron: "0 10 * * *"   # 10:00 UTC = 07:00 em Brasília
+  workflow_dispatch:        # Botão "Run workflow" para testar na hora
+
+jobs:
+  avisos:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pedir o envio dos avisos
+        env:
+          SITE_URL: ${{ secrets.SITE_URL }}
+          AVISOS_TOKEN: ${{ secrets.AVISOS_TOKEN }}
+        run: |
+          if [ -z "$SITE_URL" ] || [ -z "$AVISOS_TOKEN" ]; then
+            echo "SITE_URL ou AVISOS_TOKEN não configurados: nada a fazer."
+            exit 0
+          fi
+          # O plano grátis "dorme": as tentativas dão tempo para o site acordar
+          curl --fail --silent --show-error --retry 5 --retry-delay 20 --retry-all-errors --max-time 90 \
+            -X POST -H "Authorization: Bearer $AVISOS_TOKEN" "$SITE_URL/tarefas/avisos"

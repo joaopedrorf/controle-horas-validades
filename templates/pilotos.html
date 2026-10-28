@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block titulo %}{{ t.menu_pilotos }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina"><h1>{{ t.menu_pilotos }}</h1></div>
+
+<div class="rolagem">
+<table class="lista">
+    <thead><tr><th>{{ t.nome }}</th><th>{{ t.email }}</th><th>{{ t.documentos }}</th><th>{{ t.horas_total }}</th><th>{{ t.status }}</th><th></th></tr></thead>
+    <tbody>
+        {% for item in lista %}{% set u = item.usuario %}
+        <tr class="{% if not u.ativo %}apagada{% endif %}">
+            <td>{% if u.is_admin %}{{ u.nome }} <span class="apagado">· {{ t.papel_admin }}</span>{% else %}<a href="{{ url_for('piloto', usuario_id=u.id) }}">{{ u.nome }}</a>{% endif %}</td>
+            <td>{{ u.email }}</td>
+            <td>
+                {% if not u.is_admin %}
+                {% for s in ['vencido', 'atencao', 'em_dia'] if item.contagem[s] %}
+                <span class="selo selo-{{ s }}">{{ item.contagem[s] }} {{ t['sit_' ~ s] }}</span>
+                {% endfor %}
+                {% endif %}
+            </td>
+            <td class="mono">{% if not u.is_admin %}{{ horas(item.total) }}{% endif %}</td>
+            <td>{{ t.ativo if u.ativo else t.inativo }}</td>
+            <td>
+                {% if u.id != current_user.id %}
+                <form method="POST" action="{{ url_for('alternar_usuario', usuario_id=u.id) }}">
+                    <input type="hidden" name="csrf" value="{{ csrf }}">
+                    <button type="submit" class="botao-cancelar">{{ t.desativar if u.ativo else t.ativar }}</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+
+<form method="POST" class="cartao formulario">
+    <h2>{{ t.novo_usuario }}</h2>
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <div class="colunas">
+        <div>
+            <label for="nome">{{ t.nome }}</label>
+            <input type="text" id="nome" name="nome" maxlength="100" required>
+        </div>
+        <div>
+            <label for="email">{{ t.email }}</label>
+            <input type="email" id="email" name="email" maxlength="120" required>
+        </div>
+        <div>
+            <label for="senha">{{ t.senha }}</label>
+            <input type="password" id="senha" name="senha" minlength="8" required>
+        </div>
+        <div>
+            <label for="papel">{{ t.papel }}</label>
+            <select id="papel" name="papel">
+                {% for p in papeis %}<option value="{{ p }}">{{ t['papel_' ~ p] }}</option>{% endfor %}
+            </select>
+        </div>
+    </div>
+    <button type="submit">{{ t.adicionar }}</button>
+</form>
+{% endblock %}

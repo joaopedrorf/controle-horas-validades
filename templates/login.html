@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block titulo %}{{ t.entrar }}{% endblock %}
+{% block classe_body %}pagina-login{% endblock %}
+
+{% block corpo %}
+<div class="login">
+    <section class="login-apresentacao">
+        <div class="marca">{{ marca_icone(30) }} {{ t.titulo }}</div>
+        <div class="login-chamada">
+            <h1>{{ t.chamada }}</h1>
+            <p>{{ t.chamada_texto }}</p>
+        </div>
+        <ul class="login-semaforo" aria-hidden="true">
+            <li><span class="selo selo-vencido">{{ t.sit_vencido }}</span> CMA · {{ t.ha_dias.format(n=12) }}</li>
+            <li><span class="selo selo-atencao">{{ t.sit_atencao }}</span> MNTE · {{ t.em_dias.format(n=5) }}</li>
+            <li><span class="selo selo-em_dia">{{ t.sit_em_dia }}</span> {{ t.tipo_ingles }} · {{ t.em_dias.format(n=400) }}</li>
+        </ul>
+    </section>
+
+    <section class="login-formulario">
+        <div class="login-caixa">
+            <div class="login-topo">
+                <h2>{{ t.entrar }}</h2>
+                {{ idiomas(escuro=false) }}
+            </div>
+
+            {% with mensagens = get_flashed_messages(with_categories=true) %}
+                {% for tipo, texto in mensagens %}
+                <div class="aviso aviso-{{ tipo }}" role="status">{{ texto }}</div>
+                {% endfor %}
+            {% endwith %}
+
+            <form method="POST" class="pilha">
+                <input type="hidden" name="csrf" value="{{ csrf }}">
+                <div class="campo">
+                    <label for="email">{{ t.email }}</label>
+                    <input type="email" id="email" name="email" required autofocus>
+                </div>
+                <div class="campo">
+                    <label for="senha">{{ t.senha }}</label>
+                    <input type="password" id="senha" name="senha" required>
+                </div>
+                <button type="submit" class="botao-grande">{{ t.entrar }}</button>
+            </form>
+
+            {% if demo %}
+            <div class="cartao contas-demo">
+                <div class="contas-titulo">{{ t.contas_demo }}</div>
+                <ul>
+                    {% for nome, email, papel in contas_demo %}
+                    <li>
+                        <button type="button" class="conta" onclick="document.getElementById('email').value='{{ email }}'; document.getElementById('senha').value='demo123'; document.getElementById('senha').form.requestSubmit();">
+                            <span class="mono">{{ email }}</span><span>{{ nome }} · {{ t['papel_' ~ papel] }}</span>
+                        </button>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock %}

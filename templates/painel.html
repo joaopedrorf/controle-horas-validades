@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% import '_macros.html' as m with context %}
+{% block titulo %}{{ t.menu_painel }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <div>
+        <div class="sobretitulo">{{ data(hoje) }}</div>
+        <h1>{{ t.ola.format(nome=current_user.nome) }}</h1>
+    </div>
+    <a class="botao-principal" href="{{ url_for('voos') }}">{{ t.registrar_voo }}</a>
+</div>
+
+<h2 class="titulo-secao">{{ t.meus_documentos }}</h2>
+{{ m.contadores(contagem) }}
+{{ m.tabela_documentos(current_user.documentos, editar=false) }}
+<p><a href="{{ url_for('documentos') }}">{{ t.gerenciar_documentos }} →</a></p>
+
+<h2 class="titulo-secao">{{ t.minhas_horas }}</h2>
+{{ m.resumo_horas(resumo) }}
+<h3>{{ t.ultimos_voos }}</h3>
+{{ m.tabela_voos(ultimos, excluir=false) }}
+{% endblock %}

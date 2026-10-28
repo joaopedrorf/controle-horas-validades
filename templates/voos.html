@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% import '_macros.html' as m with context %}
+{% block titulo %}{{ t.menu_voos }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina"><h1>{{ t.menu_voos }}</h1></div>
+
+<form method="POST" class="cartao formulario">
+    <h2>{{ t.registrar_voo }}</h2>
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <div class="colunas">
+        <div>
+            <label for="data">{{ t.data }}</label>
+            <input type="date" id="data" name="data" required max="{{ hoje.isoformat() }}" value="{{ form.get('data', hoje.isoformat()) }}">
+        </div>
+        <div>
+            <label for="matricula">{{ t.matricula }}</label>
+            <input type="text" id="matricula" name="matricula" maxlength="10" required placeholder="PR-ABC" value="{{ form.get('matricula', '') }}" class="mono">
+        </div>
+        <div>
+            <label for="funcao">{{ t.funcao }}</label>
+            <select id="funcao" name="funcao">
+                {% for f in funcoes %}<option value="{{ f }}" {% if form.get('funcao') == f %}selected{% endif %}>{{ t['funcao_' ~ f] }}</option>{% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="tempo">{{ t.tempo }}</label>
+            <input type="text" id="tempo" name="tempo" required placeholder="1:30" value="{{ form.get('tempo', '') }}" class="mono" inputmode="decimal">
+        </div>
+        <div>
+            <label for="pousos">{{ t.pousos }}</label>
+            <input type="number" id="pousos" name="pousos" min="0" max="99" value="{{ form.get('pousos', 1) }}">
+        </div>
+        <div>
+            <label for="observacao">{{ t.observacao }}</label>
+            <input type="text" id="observacao" name="observacao" maxlength="200" placeholder="{{ t.observacao_dica }}" value="{{ form.get('observacao', '') }}">
+        </div>
+    </div>
+    <p class="apagado">{{ t.dica_tempo }}</p>
+    <button type="submit">{{ t.salvar }}</button>
+</form>
+
+{{ m.resumo_horas(resumo) }}
+{{ m.tabela_voos(lista) }}
+{% endblock %}

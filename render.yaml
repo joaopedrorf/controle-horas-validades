@@ -1,0 +1,21 @@
+# Configuração do Render (Blueprint): cria o site com um clique em New > Blueprint.
+# Usa SQLite com dados de demonstração: o banco é recriado a cada deploy ou reinício,
+# o que é bom para portfólio (o painel sempre volta ao estado de exemplo).
+services:
+  - type: web
+    name: controle-horas-validades
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    # Um processo só, para o SQLite não ser criado duas vezes ao mesmo tempo
+    startCommand: gunicorn app:app --workers 1 --threads 4
+    healthCheckPath: /saude
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEMO
+        value: "1"
+      - key: FUSO_HORARIO
+        value: America/Sao_Paulo

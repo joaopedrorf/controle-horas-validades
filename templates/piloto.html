@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% import '_macros.html' as m with context %}
+{% block titulo %}{{ usuario.nome }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <div>
+        <div class="sobretitulo"><a href="{{ url_for('pilotos') }}">← {{ t.menu_pilotos }}</a></div>
+        <h1>{{ usuario.nome }}</h1>
+        <div class="apagado">{{ usuario.email }}</div>
+    </div>
+</div>
+
+<h2 class="titulo-secao">{{ t.documentos }}</h2>
+{{ m.tabela_documentos(usuario.documentos) }}
+{{ m.form_documento(usuario.id) }}
+
+<h2 class="titulo-secao">{{ t.horas_de_voo }}</h2>
+{{ m.resumo_horas(resumo) }}
+{{ m.tabela_voos(usuario.voos[:20], excluir=false) }}
+{% endblock %}

@@ -1,0 +1,140 @@
+{# Pedaços repetidos entre as páginas #}
+
+{% macro selo(doc) -%}
+{% set s = situacao(doc) %}{% set d = dias(doc) %}
+<span class="selo selo-{{ s }}">{{ t['sit_' ~ s] }}</span>
+<span class="apagado">
+    {%- if d < 0 %}{{ t.ha_dias.format(n=-d) }}{% elif d == 0 %}{{ t.vence_hoje }}{% else %}{{ t.em_dias.format(n=d) }}{% endif -%}
+</span>
+{%- endmacro %}
+
+{% macro nome_doc(doc) -%}
+{{ t['tipo_' ~ doc.tipo] }}{% if doc.descricao %} <span class="apagado">· {{ doc.descricao }}</span>{% endif %}
+{%- endmacro %}
+
+{% macro contadores(contagem) -%}
+<div class="contadores contadores-3">
+    {% for s in ['vencido', 'atencao', 'em_dia'] %}
+    <div class="cartao contador contador-{{ s }}">
+        <div class="contador-numero">{{ contagem[s] }}</div>
+        <div class="contador-nome">{{ t['cont_' ~ s] }}</div>
+    </div>
+    {% endfor %}
+</div>
+{%- endmacro %}
+
+{% macro tabela_documentos(lista, mostrar_dono=false, editar=true) -%}
+{% if lista %}
+<div class="rolagem">
+<table class="lista">
+    <thead><tr>
+        {% if mostrar_dono %}<th>{{ t.piloto }}</th>{% endif %}
+        <th>{{ t.documento }}</th><th>{{ t.vencimento }}</th><th>{{ t.situacao }}</th>
+        {% if editar %}<th>{{ t.renovar }}</th><th></th>{% endif %}
+    </tr></thead>
+    <tbody>
+    {% for doc in lista %}
+        <tr class="linha-{{ situacao(doc) }}">
+            {% if mostrar_dono %}<td><a href="{{ url_for('piloto', usuario_id=doc.usuario_id) }}">{{ doc.dono.nome }}</a></td>{% endif %}
+            <td>{{ nome_doc(doc) }}</td>
+            <td class="mono">{{ data(doc.vencimento) }}</td>
+            <td>{{ selo(doc) }}</td>
+            {% if editar %}
+            <td>
+                <form method="POST" action="{{ url_for('renovar_documento', documento_id=doc.id) }}" class="em-linha">
+                    <input type="hidden" name="csrf" value="{{ csrf }}">
+                    <label class="so-leitor" for="venc-{{ doc.id }}">{{ t.nova_data }}</label>
+                    <input type="date" id="venc-{{ doc.id }}" name="vencimento" required>
+                    <button type="submit" class="botao-pequeno">{{ t.salvar }}</button>
+                </form>
+            </td>
+            <td>
+                <form method="POST" action="{{ url_for('excluir_documento', documento_id=doc.id) }}" onsubmit="return confirm('{{ t.confirmar_excluir }}');">
+                    <input type="hidden" name="csrf" value="{{ csrf }}">
+                    <button type="submit" class="botao-cancelar">{{ t.excluir }}</button>
+                </form>
+            </td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}
+<p class="apagado">{{ t.nenhum_documento }}</p>
+{% endif %}
+{%- endmacro %}
+
+{% macro form_documento(usuario_id=none) -%}
+<form method="POST" action="{{ url_for('documentos') }}" class="cartao formulario">
+    <h2>{{ t.novo_documento }}</h2>
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    {% if usuario_id %}<input type="hidden" name="usuario_id" value="{{ usuario_id }}">{% endif %}
+    <div class="colunas">
+        <div>
+            <label for="tipo">{{ t.documento }}</label>
+            <select id="tipo" name="tipo">
+                {% for tp in tipos %}<option value="{{ tp }}">{{ t['tipo_' ~ tp] }}</option>{% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="descricao">{{ t.descricao }}</label>
+            <input type="text" id="descricao" name="descricao" maxlength="80" placeholder="{{ t.descricao_dica }}">
+        </div>
+        <div>
+            <label for="vencimento">{{ t.vencimento }}</label>
+            <input type="date" id="vencimento" name="vencimento" required>
+        </div>
+    </div>
+    <p class="apagado">{{ t.dica_vencimento }}</p>
+    <button type="submit">{{ t.adicionar }}</button>
+</form>
+{%- endmacro %}
+
+{% macro resumo_horas(resumo) -%}
+<div class="contadores">
+    <div class="cartao contador"><div class="contador-numero mono">{{ horas(resumo.total) }}</div><div class="contador-nome">{{ t.horas_total }}</div></div>
+    <div class="cartao contador"><div class="contador-numero mono">{{ horas(resumo.dias_30) }}</div><div class="contador-nome">{{ t.horas_30 }}</div></div>
+    <div class="cartao contador"><div class="contador-numero mono">{{ horas(resumo.dias_90) }}</div><div class="contador-nome">{{ t.horas_90 }}</div></div>
+    <div class="cartao contador"><div class="contador-numero mono">{{ resumo.pousos_90 }}</div><div class="contador-nome">{{ t.pousos_90 }}</div></div>
+</div>
+{% if resumo.por_funcao %}
+<p class="por-funcao">
+    {% for f in funcoes if f in resumo.por_funcao %}
+    <span><span class="apagado">{{ t['funcao_' ~ f] }}</span> <span class="mono">{{ horas(resumo.por_funcao[f]) }}</span></span>
+    {% endfor %}
+</p>
+{% endif %}
+{%- endmacro %}
+
+{% macro tabela_voos(lista, excluir=true) -%}
+{% if lista %}
+<div class="rolagem">
+<table class="lista">
+    <thead><tr><th>{{ t.data }}</th><th>{{ t.matricula }}</th><th>{{ t.funcao }}</th><th>{{ t.tempo }}</th><th>{{ t.pousos }}</th><th>{{ t.observacao }}</th>{% if excluir %}<th></th>{% endif %}</tr></thead>
+    <tbody>
+    {% for v in lista %}
+        <tr>
+            <td class="mono">{{ data(v.data) }}</td>
+            <td class="mono">{{ v.matricula }}</td>
+            <td>{{ t['funcao_' ~ v.funcao] }}</td>
+            <td class="mono">{{ horas(v.minutos) }}</td>
+            <td class="mono">{{ v.pousos }}</td>
+            <td>{{ v.observacao }}</td>
+            {% if excluir %}
+            <td>
+                <form method="POST" action="{{ url_for('excluir_voo', voo_id=v.id) }}" onsubmit="return confirm('{{ t.confirmar_excluir }}');">
+                    <input type="hidden" name="csrf" value="{{ csrf }}">
+                    <button type="submit" class="botao-cancelar">{{ t.excluir }}</button>
+                </form>
+            </td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}
+<p class="apagado">{{ t.nenhum_voo }}</p>
+{% endif %}
+{%- endmacro %}

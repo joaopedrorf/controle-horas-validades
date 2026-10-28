@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block titulo %}{{ t['erro_titulo_' ~ codigo] }}{% endblock %}
+
+{% block corpo %}
+<main class="pagina-erro">
+    <div class="erro-codigo" aria-hidden="true">{{ codigo }}</div>
+    <h1>{{ t['erro_titulo_' ~ codigo] }}</h1>
+    <p>{{ t['erro_texto_' ~ codigo] }}</p>
+    <a class="botao-principal" href="{{ url_for('painel') }}">{{ t.voltar_inicio }}</a>
+</main>
+{% endblock %}
