@@ -7,6 +7,8 @@
 
 🇧🇷 [Português](#-português) · 🇺🇸 [English](#-english)
 
+**🌐 Ver online / Live demo: [controle-horas-validades.onrender.com](https://controle-horas-validades.onrender.com)** · senha / password `demo123`
+
 ![Painel da secretaria](docs/painel-secretaria.png)
 
 ## 🇧🇷 Português
